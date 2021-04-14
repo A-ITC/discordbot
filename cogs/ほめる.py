@@ -36,7 +36,13 @@ class Encourage(commands.Cog):
             ]
         async with ctx.channel.typing():
             await ctx.reply(random.choice(texts))
-
+            
+    @commands.command()
+    async def ほめて(self,ctx):
+        await self.ほめる(ctx)
+    @commands.command()
+    async def ほめろ(self,ctx):
+        await self.ほめる(ctx)
         
 def setup(bot):
     bot.add_cog(Encourage(bot))

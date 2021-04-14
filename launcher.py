@@ -13,13 +13,13 @@ class ITCBot(commands.Bot):
         self.yobi_timer_dat=[]#決められた曜日で
         super().__init__(command_prefix=command_prefix,  **options)
     onAddTimer=[]
-    def on_add_timer_event(func):
+    def on_add_timer_event(self,func):
         self.onAddTimer.append(func)
-    def invoke_add_timer():
+    def invoke_add_timer(self):
         for eve in self.onAddTimer:
             eve()
     # 任意のチャンネルで挨拶する非同期関数を定義
-    async def greet():
+    async def greet(self):
         channel = bot.get_channel(config.CHANNEL_ID)
         if channel==None:
             print("error : get channel failed")
@@ -42,7 +42,7 @@ intents.members=True
 
 print("build bot")
 #botインスタンスの作成
-bot = ITCBot("!",intents=intents)
+bot = ITCBot(command_prefix=["!","！","/"],intents=intents)
 bot.load_extension("cogs.add_role") 
 bot.load_extension("cogs.client_app_info") 
 bot.load_extension("cogs.count_members")
@@ -61,6 +61,8 @@ bot.load_extension("cogs.stop")
 bot.load_extension("cogs.おみくじ")
 bot.load_extension("cogs.ほめる")
 bot.load_extension("cogs.メスガキ")
+bot.load_extension("cogs.召喚")
+bot.load_extension("cogs.天気")
 
 
 @bot.event
@@ -120,7 +122,7 @@ async def loop():
     while index<len(bot.timer_dat):
         time= bot.timer_dat[index]
         if now == time[0]:
-            channel = bot.get_channel(CHANNEL_ID)
+            channel = bot.get_channel(config.CHANNEL_ID)
             await channel.send(time[1])
             bot.timer_dat.pop(index)
             continue
