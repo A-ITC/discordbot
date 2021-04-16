@@ -18,19 +18,17 @@ class ITCBot(commands.Bot):
     def invoke_add_timer(self):
         for eve in self.onAddTimer:
             eve()
+    def add_timer(self,month,day,min,sec,span):
+    
+        return
+    
+    
     # 任意のチャンネルで挨拶する非同期関数を定義
     async def greet(self):
-        channel = bot.get_channel(config.CHANNEL_ID)
-        if channel==None:
-            print("error : get channel failed")
-        texts=[
-            "Hello, I'm bot.",
-            "Botを起動します。",
-            "Bot has been activated.",
-            "Ni hao!"
-            ]
-        #await channel.send(random.choice(texts))
-        await bot.change_presence(activity=discord.Game("鋭意制作中..."))
+        #channel = bot.get_channel(config.CHANNEL_ID)
+        #if channel==None:
+        #    print("error : get channel failed")
+        return
 
     # Botの準備完了時に呼び出されるイベント
     async def on_ready(self):
@@ -52,6 +50,7 @@ bot.load_extension("cogs.guild_info")
 bot.load_extension("cogs.hello") 
 bot.load_extension("cogs.man")
 bot.load_extension("cogs.member_info") 
+bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.member_send")
 bot.load_extension("cogs.reload") 
 bot.load_extension("cogs.role_info") 

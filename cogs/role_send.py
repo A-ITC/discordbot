@@ -56,11 +56,17 @@ class RoleSend(commands.Cog):
             return are_same_messages and is_author
         emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
         if emoji[0].emoji=="✅":
+            member_str=""
+            for i in role_.members:
+                member_str+=f"{i.mention}\n"
             sent_msg= await ctx.send(
                 f"完了が確認されました。以下の内容でよろしいでしょうか？\n"
                 f"=======================\n"
                 f"{self.message}\n"
                 f"=======================\n"
+                f"送信する人は\n"
+                f"{member_str}"
+                f"です。\n"
                 f"よろしければもう一度「✅」、キャンセルし編集を続ける場合は「♻」、コマンドを終了する場合は「❌」とリアクションしてください。"
                 )
             self.waiting_message=False
