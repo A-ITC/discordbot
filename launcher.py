@@ -6,6 +6,11 @@ import asyncio
 import random
 from discord.ext import tasks
 
+class Timer:
+    def __init__(self,year,month,day,hour,min,sec,span):
+        self.begin_time=datetime(year,month,day,min,sec)
+        self.span=span
+
 class ITCBot(commands.Bot):
     def __init__( self,command_prefix,**options):
         self.voice_count=0
@@ -18,7 +23,7 @@ class ITCBot(commands.Bot):
     def invoke_add_timer(self):
         for eve in self.onAddTimer:
             eve()
-    def add_timer(self,month,day,min,sec,span):
+    def add_timer(self,year,month,day,hour,min,sec,span):
     
         return
     
