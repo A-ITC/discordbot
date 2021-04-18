@@ -223,7 +223,7 @@ class YobiSetter:
                     for i in range(len(selected)):
                         if selected[i]:
                             day=yobi_begin(today,i)
-                            self.dates.append(TimerList.BeginDate(day.year,day.month,day.day,day.weekday()))
+                            self.timers.add_day(day.year,day.month,day.day,day.weekday())
                     await self.ctx.send("曜日をセットしました。")
                     return False
                 elif emoji[0].emoji=="♻":

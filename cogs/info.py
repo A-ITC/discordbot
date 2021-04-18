@@ -10,21 +10,42 @@ class Info(commands.Cog):
         self.count=0
                 
     @commands.command()
-    async def info(self, ctx,target):
+    async def info(self, ctx,target=None):
         self.count+=1
+        if type(target)is type(None):
+            await self.guild(ctx)
+            return
         print(type(target))
         print(target)
         target=target.strip("<!&@>")
         role_=ctx.guild.get_role(int(target))
         member_=ctx.guild.get_member(int(target))
         if type(role_) is not type(None):
-            self.role(ctx,role_)
+            await self.role(ctx,role_)
         elif type(member_) is not type(None):
-            self.member(ctx,member_)
+            await self.member(ctx,member_)
         else:
             await ctx.reply("error")
         return
         
+    async def guild(self,ctx):
+        from datetime import timedelta
+        guild = ctx.guild
+        # 受け取ったメッセージの内容を使って返信
+        embed = discord.Embed(title="サーバー情報")
+        # Embed の表示色を青色に設定
+        embed.color = config.EMBED_COLOR
+        embed.add_field(name="サーバー名", value=guild.name,inline=False)
+        embed.add_field(name="サーバー ID", value=guild.id,inline=False)
+        embed.add_field(name="サーバー所有者", value=guild.owner.name,inline=False)
+        embed.add_field(name="参加人数", value=guild.member_count,inline=False)
+        embed.add_field(name="設立日時", value=guild.created_at + timedelta(hours=9),inline=False)
+        embed.add_field(name="テキストチャンネル数", value=len(guild.text_channels),inline=False)
+        embed.add_field(name="ボイスチャンネル数", value=len(guild.voice_channels),inline=False)
+        embed.set_thumbnail(url=guild.icon_url)
+        async with ctx.channel.typing():
+            await ctx.reply(embed=embed)
+
     async def role(self,ctx,role_):
         from datetime import timedelta
         # 受け取ったメッセージの内容を使って返信
