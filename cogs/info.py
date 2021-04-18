@@ -1,22 +1,48 @@
-
 from discord.ext import commands
 import discord
 import config
 import sys
 import asyncio 
 
-class MemberInfo(commands.Cog):
+class Info(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
         self.count=0
                 
     @commands.command()
-    async def member_info(self, ctx,member_: discord.Member=None):
+    async def info(self, ctx,target):
         self.count+=1
+        print(type(target))
+        print(target)
+        target=target.strip("<!&@>")
+        role_=ctx.guild.get_role(int(target))
+        member_=ctx.guild.get_member(int(target))
+        if type(role_) is not type(None):
+            self.role(ctx,role_)
+        elif type(member_) is not type(None):
+            self.member(ctx,member_)
+        else:
+            await ctx.reply("error")
+        return
+        
+    async def role(self,ctx,role_):
+        from datetime import timedelta
+        # 受け取ったメッセージの内容を使って返信
+        embed = discord.Embed(title="ロール情報")
+        # Embed の表示色を青色に設定
+        embed.color = config.EMBED_COLOR
+        embed.add_field(name="ロール名", value=role_.name,inline=False)
+        embed.add_field(name="ID", value=role_.id,inline=False)
+        embed.add_field(name="色", value=role_.color,inline=False)
+        embed.add_field(name="作成日時", value=role_.created_at+ timedelta(hours=9),inline=False)
+        embed.add_field(name="メンバー数", value=len(role_.members),inline=False)
+        embed.add_field(name="メンション可能", value=role_.mentionable,inline=False)
+        async with ctx.channel.typing():
+            await ctx.reply(embed=embed)
+
+    async def member(self,ctx,member_):
         from datetime import timedelta
         member = member_
-        if member is None:
-            member=ctx.author
         roles=""
         for i in member.roles:
             if i.name =="@everyone":continue
@@ -42,4 +68,4 @@ class MemberInfo(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MemberInfo(bot))
+    bot.add_cog(Info(bot))
