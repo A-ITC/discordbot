@@ -27,6 +27,10 @@ class Send2(commands.Cog):
             await ctx.reply("送信先が指定されていません")
             return
         target_members,target_mentions=self.get_targets(ctx,targets)
+        if len(target_members)==0:
+            await ctx.reply("条件に合うメンバーがいません")
+            return
+
         self.target_person=ctx.author
         sent_msg= await self.send_message(ctx,target_mentions)
 
