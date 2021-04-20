@@ -3,6 +3,7 @@ import discord
 import config
 import sys
 import asyncio 
+import utility
 
 class Send(commands.Cog):
     def __init__(self,bot):
@@ -19,14 +20,13 @@ class Send(commands.Cog):
         if type(arg) is type(None):
             await ctx.reply("指定されていません")
             return
-        print(type(arg))
-        print(arg)
-        print(str(arg))
-        target=arg.strip("<!&@>")
+        target=arg.strip("<!&@>")#argはroleもしくはmember がstr形式で送られてくるので、id(int)を抽出する
         role_=ctx.guild.get_role(int(target))
         member_=ctx.guild.get_member(int(target))
         targets=[]
         sent_msg=None
+        self.message=""
+        self.waiting_message=False
         if type(role_) is not type(None):
             targets=role_.members
             sent_msg= await self.send_message(ctx,role_)
@@ -44,10 +44,11 @@ class Send(commands.Cog):
                 retryFlag=False
                 if not wait_responce:return
                 retryFlag = await self.await_responce(ctx,targets,sent_msg)
-                if not retryFlag:return
-                sent_msg=await ctx.reply(f"'{arg.name}' に DM を一斉送信します。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
-                await sent_msg.add_reaction("✅")
-                await sent_msg.add_reaction("❌")
+                if not retryFlag:return#キャンセルされたらコマンドを終了
+                if type(role_) is not type(None):
+                    sent_msg= await self.send_message(ctx,role_)
+                elif type(member_) is not type(None):
+                    sent_msg= await self.send_message(ctx,member_)
                 self.waiting_message=True
         except asyncio.TimeoutError:
             await ctx.send(f"タイムアウトしました。")
@@ -57,19 +58,12 @@ class Send(commands.Cog):
 
     async def send_message(self,ctx,target):
         sent_msg=await ctx.reply(f"'{target.name}' に DM を一斉送信します。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
-        await sent_msg.add_reaction("✅")
-        await sent_msg.add_reaction("❌")
-        self.message=""
         self.waiting_message=True
         return sent_msg
 
     async def await_finish(self,ctx,members,sent_msg):
-        def reaction_check(reaction_, user_):
-            is_author=user_==self.target_person
-            are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-            return are_same_messages and is_author
-        emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
-        if emoji[0].emoji=="✅":
+        send_flag=await utility.check_yes_no(self.bot,ctx,sent_msg)
+        if send_flag:
             member_str=""
             for i in members:
                 member_str+=f"{i.mention}\n"
@@ -84,29 +78,21 @@ class Send(commands.Cog):
                 f"よろしければもう一度「✅」、キャンセルし編集を続ける場合は「♻」、コマンドを終了する場合は「❌」とリアクションしてください。"
                 )
             self.waiting_message=False
-            await sent_msg.add_reaction("✅")
-            await sent_msg.add_reaction("♻")
-            await sent_msg.add_reaction("❌")
             return sent_msg,True
-        if emoji[0].emoji=="❌":
+        else:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
             self.message=""
             return None,False
 
     async def await_responce(self,ctx,members,sent_msg):
-        def reaction_check2(reaction_, user_):
-            is_author=user_==self.target_person
-            are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-            return are_same_messages and is_author
-        emoji = await self.bot.wait_for('reaction_add', check=reaction_check2, timeout=180)
-        print(f"checkkkkk {emoji} {type(emoji)}")
-        if emoji[0].emoji=="❌":
+        state=await utility.check_yes_no_cancel(self.bot,ctx,sent_msg)
+        if state==0:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
             self.message=""
             return False
-        if emoji[0].emoji=="✅":
+        if state==1:
             await ctx.send("送信します。")
             if self.message =="":
                 await ctx.send("空メッセージは送信できません。終了します")
@@ -115,7 +101,7 @@ class Send(commands.Cog):
                 await i.send(content=self.message)
             await ctx.send("送信が完了しました。")
             return False
-        if emoji[0].emoji=="♻":
+        if state==-1:
             await ctx.send("編集を続けてください。")
             return True
         

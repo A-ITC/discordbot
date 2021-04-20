@@ -32,7 +32,7 @@ class CountMembers(commands.Cog):
             role_str+=i.name+" "
         await ctx.reply(f"役職 '{role_str}' を持っているメンバー数: {num} 人 / {ctx.guild.member_count} 人")
 
-    def check_condition(self,member,roles):
+    def check_condition(self,member,roles):#そのmemberがrolesをすべて持っていたらtrue
         for i in roles:
             if i not in member.roles:return False
         return True

@@ -4,6 +4,7 @@ import config
 import sys
 import asyncio 
 import random 
+import utility
 
 class Stop(commands.Cog):
     def __init__(self,bot):
@@ -29,18 +30,11 @@ class Stop(commands.Cog):
             ]
         try:
             if type(option)==type(None):
-                sent_msg=await ctx.reply("Botを停止させますか？")
-                await sent_msg.add_reaction("✅")
-                await sent_msg.add_reaction("❌")
-                def reaction_check(reaction_, user_):
-                    is_author=user_==ctx.author
-                    are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-                    return are_same_messages and is_author
-                emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
-                if emoji[0].emoji=="✅":
+                stop_flag=await utility.yes_no(self.bot,ctx,"Botを停止させますか？")
+                if stop_flag:
                     await ctx.reply(random.choice(texts))
                     await self.bot.close()
-                elif emoji[0].emoji=="❌":
+                else:
                     await ctx.reply("キャンセルします。")
             else:
                 await ctx.reply(random.choice(texts))

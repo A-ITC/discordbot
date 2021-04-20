@@ -3,6 +3,7 @@ import discord
 import config
 import sys
 import asyncio 
+import utility
 
 class Send2(commands.Cog):
     def __init__(self,bot):
@@ -14,40 +15,31 @@ class Send2(commands.Cog):
     
     #https://discordpy.readthedocs.io/ja/latest/ext/commands/commands.html
     @commands.command()
-    async def send2(self, ctx,arg):
+    async def send2(self, ctx,*arg):
         self.count+=1
         if type(arg) is type(None):
-            await ctx.reply("指定されていません")
+            await ctx.reply("送信先が指定されていません")
             return
-        print(type(arg))
-        print(arg)
-        print(str(arg))
-        target=arg.strip("<!&@>")
-        role_=ctx.guild.get_role(int(target))
-        member_=ctx.guild.get_member(int(target))
         targets=[]
-        sent_msg=None
-        if type(role_) is not type(None):
-            targets=role_.members
-            sent_msg= await self.send_message(ctx,role_)
-        elif type(member_) is not type(None):
-            targets=[member_]
-            sent_msg= await self.send_message(ctx,member_)
-        else:
-            await ctx.reply("error")
+        for t in arg:
+            targets.append(t)
+        if len(targets)==0:
+            await ctx.reply("送信先が指定されていません")
+            return
+        target_members,target_mentions=self.get_targets(ctx,targets)
         self.target_person=ctx.author
+        sent_msg= await self.send_message(ctx,target_mentions)
 
         try:
             while True:
                 print("wait message")
-                sent_msg,wait_responce = await self.await_finish(ctx,targets,sent_msg)
+                sent_msg,wait_responce = await self.await_finish(ctx,target_members,sent_msg)
                 retryFlag=False
                 if not wait_responce:return
-                retryFlag = await self.await_responce(ctx,targets,sent_msg)
-                if not retryFlag:return
-                sent_msg=await ctx.reply(f"'{arg.name}' に DM を一斉送信します。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
-                await sent_msg.add_reaction("✅")
-                await sent_msg.add_reaction("❌")
+                retryFlag = await self.await_responce(ctx,target_members,sent_msg)
+                if not retryFlag:return#キャンセルされたらコマンドを終了
+                #再確認
+                sent_msg= await self.send_message(ctx,target_mentions)
                 self.waiting_message=True
         except asyncio.TimeoutError:
             await ctx.send(f"タイムアウトしました。")
@@ -55,24 +47,18 @@ class Send2(commands.Cog):
             self.message=""
             return
 
-    async def send_message(self,ctx,target):
-        sent_msg=await ctx.reply(f"'{target.name}' に DM を一斉送信します。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
-        await sent_msg.add_reaction("✅")
-        await sent_msg.add_reaction("❌")
-        self.message=""
+    async def send_message(self,ctx,target_mentions):
+        targets="\n".join(target_mentions)
+        sent_msg=await ctx.reply(f"'{targets}' に DM を一斉送信します。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
         self.waiting_message=True
         return sent_msg
 
-    async def await_finish(self,ctx,members,sent_msg):
-        def reaction_check(reaction_, user_):
-            is_author=user_==self.target_person
-            are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-            return are_same_messages and is_author
-        emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
-        if emoji[0].emoji=="✅":
+    async def await_finish(self,ctx,target_members,sent_msg):
+        send_flag=await utility.check_yes_no(self.bot,ctx,sent_msg)
+        if send_flag:
             member_str=""
-            for i in members:
-                member_str+=f"{i.mention}\n"
+            for target in target_members:
+                member_str+=f"{target.mention}\n"
             sent_msg= await ctx.send(
                 f"完了が確認されました。以下の内容でよろしいでしょうか？\n"
                 f"=======================\n"
@@ -84,41 +70,63 @@ class Send2(commands.Cog):
                 f"よろしければもう一度「✅」、キャンセルし編集を続ける場合は「♻」、コマンドを終了する場合は「❌」とリアクションしてください。"
                 )
             self.waiting_message=False
-            await sent_msg.add_reaction("✅")
-            await sent_msg.add_reaction("♻")
-            await sent_msg.add_reaction("❌")
             return sent_msg,True
-        if emoji[0].emoji=="❌":
+        else:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
             self.message=""
             return None,False
 
-    async def await_responce(self,ctx,members,sent_msg):
-        def reaction_check2(reaction_, user_):
-            is_author=user_==self.target_person
-            are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-            return are_same_messages and is_author
-        emoji = await self.bot.wait_for('reaction_add', check=reaction_check2, timeout=180)
-        print(f"checkkkkk {emoji} {type(emoji)}")
-        if emoji[0].emoji=="❌":
+    async def await_responce(self,ctx,target_members,sent_msg):
+        state=await utility.check_yes_no_cancel(self.bot,ctx,sent_msg)
+        if state==0:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
             self.message=""
             return False
-        if emoji[0].emoji=="✅":
+        if state==1:
             await ctx.send("送信します。")
             if self.message =="":
                 await ctx.send("空メッセージは送信できません。終了します")
                 return False
-            for i in members:
+            for i in target_members:
                 await i.send(content=self.message)
             await ctx.send("送信が完了しました。")
             return False
-        if emoji[0].emoji=="♻":
+        if state==-1:
             await ctx.send("編集を続けてください。")
             return True
         
+    def get_targets(self,ctx,targets):
+        target_roles=[]
+        target_members=[]
+        target_names=[]
+        for target in targets:
+            id=target.strip("<!&@>")#argはroleもしくはmember がstr形式で送られてくるので、id(int)を抽出する
+            role_=ctx.guild.get_role(int(id))
+            member_=ctx.guild.get_member(int(id))
+            if type(role_) is not type(None):
+                target_roles.append(role_)
+                target_names.append(role_.mention)
+            elif type(member_) is not type(None):
+                target_members.append(member_)
+                target_names.append(member_.mention)
+            else:
+                print("error")
+        print(f"target roles is {target_roles}")
+        for member in ctx.guild.members:
+            if self.check_condition(member,target_roles):
+                print(f"send2 append {member}")
+                if member not in target_members:#すでに入ってたら２重に送信しないようスキップ
+                    target_members.append(member)
+        return target_members,target_names
+
+    def check_condition(self,member,roles):#そのmemberがrolesをすべて持っていたらtrue
+        if len(roles)==0:return False
+        for i in roles:
+            if i not in member.roles:return False
+        return True
+
     @commands.Cog.listener("on_message")
     async def on_message(self,message):
         if not self.waiting_message:return

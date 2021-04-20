@@ -8,7 +8,7 @@ from discord.ext import tasks
 
 class Timer:
     def __init__(self,year,month,day,hour,min,sec,span):
-        self.begin_time=datetime(year,month,day,min,sec)
+        self.begin_time=datetime.datetime(year,month,day,min,sec)
         self.span=span
 
 class ITCBot(commands.Bot):
@@ -56,6 +56,7 @@ bot.load_extension("cogs.join")
 bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.reload") 
 bot.load_extension("cogs.send") 
+bot.load_extension("cogs.send2") 
 bot.load_extension("cogs.set_timer") 
 bot.load_extension("cogs.stop")
 bot.load_extension("cogs.おみくじ")
