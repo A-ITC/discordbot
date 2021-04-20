@@ -52,6 +52,7 @@ bot.load_extension("cogs.count_members")
 bot.load_extension("cogs.dice")
 bot.load_extension("cogs.get_roles") 
 bot.load_extension("cogs.info") 
+bot.load_extension("cogs.join") 
 bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.reload") 
 bot.load_extension("cogs.send") 
@@ -69,12 +70,10 @@ async def on_message(message):
     try:
         if message.author.bot: # メッセージの送信者がBotなら何もしない
             return
-        print(message.reference)
-        #elif "Kyoichi" in message.content or "kyoichi" in message.content :
-        #    await message.channel.send(" はい、Kyoichi です ")
+        #print(message.reference)
+        await bot.process_commands(message)
     except Exception as e:
         print(e)
-    await bot.process_commands(message)
     
 @bot.event
 async def on_disconnect():
@@ -110,13 +109,13 @@ async def on_voice_state_update(member,before,after):
     except Exception as e:
         print(e)
 
-
+import datetime
 #https://qiita.com/higuratu/items/033e6fa655ee4b1d2ff0
 # 60秒に一回ループ
 @tasks.loop(seconds=60)
 async def loop():
     # 現在の時刻
-    now = datetime.now().strftime('%m:%d:%H:%M')
+    now = datetime.datetime.now().strftime('%m:%d:%H:%M')
     index=0
     while index<len(bot.timer_dat):
         time= bot.timer_dat[index]
@@ -126,7 +125,91 @@ async def loop():
             bot.timer_dat.pop(index)
             continue
         index+=1
+import csv
+import os
 
+"""#中止
+check_interval=60
+@tasks.loop(seconds=check_interval)#30分に一回
+async def check_online():
+    print("check loop")
+    print(f"{config.CHANNEL_ID}を探します")
+    channel = bot.get_channel(config.CHANNEL_ID)
+    print(channel)
+    if type(channel)==type(None):
+        print("error : get channel failed")
+    else:
+        await channel.send("30分タイマーテスト")
+
+    now = datetime.datetime.now().strftime('%m/%d %H:%M:%S')
+    print(now)
+    print(bot.guilds)
+    for guild in bot.guilds:
+        check_online_guild(guild)
+        
+def check_online_guild(guild):
+    filename=guild.name
+    dir_path="data"
+    path=dir_path+f"/{filename}.csv"
+    data=read_csv(path)
+    for role in guild.roles:
+        if role.hoist:#そのロールが他のロールと分けて表示に設定されてたら
+            if role.name not in data:
+                data[role.name]=[]
+            data[role.name].append(len(role.members))
+    if not os.path.exists(dir_path):#
+        print("ディレクトリがありません")
+        os.mkdir(dir_path)
+    print(f"{guild.name}について書き込みます")
+    with open(path, 'w') as f:
+        writer = csv.writer(f)
+        headers=[]
+        for i in data.keys():
+            print(i)
+            headers.append(i)
+        writer.writerow(headers)#ヘッダーを記入
+        output=[]
+        for i in range(0,len(data["time"])):
+            output.append([])
+            output[i].append(data["time"][i])
+        now=datetime.datetime.now().strftime('%m/%d %H:%M:%S')
+        output.append([])
+        output[-1].append(now)
+        for v in data.values():
+            count=0
+            for i in v:
+                output[count].append(i)
+            count+=1
+        for i in output:
+            print(f"書き込む内容 {i}")
+            writer.writerow(i)
+
+def read_csv(path):
+    data={"time":[]}
+    headers=[]#最初の要素は時間
+    if not os.path.exists(path):return data#ファイルがなかったらとばす
+    with open(path, 'r') as f:
+        print(f"既存のファイルが確認されました。{path}から読み込みます。")
+        reader = csv.reader(f)
+        is_header=False
+        for row in reader:
+            if not is_header:#最初の行（ヘッダー）
+                is_header=True
+                headers.extend(row)
+                for header in headers:data[header]=[]
+                continue
+            if len(row)!=len(headers):
+                print("フォーマットエラー")
+                print(headers)
+                print(row)
+                break#rowのデータ数がヘッダ数とあってなかったら強制終了
+            count=0
+            for dat in row:
+                data[headers[count]].append(dat)
+                count+=1
+        print(f"ヘッダー {headers}")
+        return data
+"""
 #いったん中止
 @bot.command()
 async def count_cogs(ctx):
@@ -139,6 +222,10 @@ async def count_cogs(ctx):
     for i in cog_list:
         embed.add_field(name=f"{i}", value=f"{bot.cogs[i].count}",inline=False)
     await ctx.send(embed=embed)
+@bot.command()
+async def get_guilds(ctx):
+    await ctx.send(bot.guilds)
 
 print("start run")
+#check_online.start()
 bot.run(config.TOKEN)#Botのトークン

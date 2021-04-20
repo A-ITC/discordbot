@@ -12,7 +12,7 @@ class Stop(commands.Cog):
                 
     @commands.is_owner()
     @commands.command()
-    async def stop(self,ctx):
+    async def stop(self,ctx,option=None):
         self.count+=1
         texts=[
             "ミ゜（絶命）",
@@ -27,9 +27,27 @@ class Stop(commands.Cog):
             "Sleeping",
             "ぐあああああっ"
             ]
-        await ctx.reply(random.choice(texts))
+        try:
+            if type(option)==type(None):
+                sent_msg=await ctx.reply("Botを停止させますか？")
+                await sent_msg.add_reaction("✅")
+                await sent_msg.add_reaction("❌")
+                def reaction_check(reaction_, user_):
+                    is_author=user_==ctx.author
+                    are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
+                    return are_same_messages and is_author
+                emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
+                if emoji[0].emoji=="✅":
+                    await ctx.reply(random.choice(texts))
+                    await self.bot.close()
+                elif emoji[0].emoji=="❌":
+                    await ctx.reply("キャンセルします。")
+            else:
+                await ctx.reply(random.choice(texts))
+                await self.bot.close()
+        except asyncio.TimeoutError:
+            await ctx.send(f"タイムアウトしました。")
         #await self.bot.logout()
-        await self.bot.close()
         
 def setup(bot):
     bot.add_cog(Stop(bot))
