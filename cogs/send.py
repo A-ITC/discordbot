@@ -64,6 +64,9 @@ class Send(commands.Cog):
     async def await_finish(self,ctx,members,sent_msg):
         send_flag=await utility.check_yes_no(self.bot,ctx,sent_msg)
         if send_flag:
+            if self.message =="":
+                await ctx.send("空メッセージは送信できません。終了します。")
+                return None,False
             member_str=""
             for i in members:
                 member_str+=f"{i.mention}\n"
@@ -94,9 +97,6 @@ class Send(commands.Cog):
             return False
         if state==1:
             await ctx.send("送信します。")
-            if self.message =="":
-                await ctx.send("空メッセージは送信できません。終了します")
-                return False
             for i in members:
                 await i.send(content=self.message)
             await ctx.send("送信が完了しました。")
@@ -107,8 +107,7 @@ class Send(commands.Cog):
         
     @commands.Cog.listener("on_message")
     async def on_message(self,message):
-        if not self.waiting_message:return
-        #if message.content=="完了":return
+        if not self.waiting_message:return#メッセージを待っていなかったらスルー
         if message.author == self.target_person:
             self.message += message.content + "\n"
 

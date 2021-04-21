@@ -3,6 +3,7 @@ import discord
 import config
 import sys
 import asyncio 
+import utility
 
 class MemberListUp(commands.Cog):
     def __init__(self,bot):
@@ -14,12 +15,27 @@ class MemberListUp(commands.Cog):
     
     #https://discordpy.readthedocs.io/ja/latest/ext/commands/commands.html
     @commands.command()
-    async def member_list_up(self, ctx,role_:discord.Role):
+    async def member_list_up(self, ctx,*roles_):
         self.count+=1
-        member_str=""
-        for i in role_.members:
-            member_str+=f"{i.mention}\n"
-        await ctx.reply(member_str)
+        if type(roles_)is type(None):
+            await ctx.reply("ロールが指定されていません")
+        targets=[]
+        for role in roles_:
+            print(role)
+            role_num=role.strip("<!&@>")
+            print(role_num)
+            role_id=ctx.guild.get_role(int(role_num))
+            targets.append(role_id)
+        role_str=""
+        for i in targets:
+            role_str+=f"{i.mention}\n"
+
+        members=[]
+        for member in ctx.guild.members:
+            if utility.check_condition(member,targets):members.append(member.mention)
+        
+        role_str="\n".join(members)
+        await ctx.reply(f"{role_str}")
 
 def setup(bot):
     bot.add_cog(MemberListUp(bot))

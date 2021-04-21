@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import config
+import utility
 import sys
 import asyncio 
 
@@ -24,18 +25,12 @@ class CountMembers(commands.Cog):
         print(targets)
         
         for member in ctx.guild.members:
-            if self.check_condition(member,targets):num+=1
+            if utility.check_condition(member,targets):num+=1
         
         role_str=""
-
         for i in targets:
-            role_str+=i.name+" "
+            role_str+=i.mention+" "
         await ctx.reply(f"役職 '{role_str}' を持っているメンバー数: {num} 人 / {ctx.guild.member_count} 人")
-
-    def check_condition(self,member,roles):#そのmemberがrolesをすべて持っていたらtrue
-        for i in roles:
-            if i not in member.roles:return False
-        return True
 
 def setup(bot):
     bot.add_cog(CountMembers(bot))
