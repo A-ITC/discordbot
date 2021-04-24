@@ -69,18 +69,24 @@ async def yes_no_cancel(bot,ctx,text,timeout=300):
     return None
 
 #そのmemberがrolesをすべて持っていたらtrue
-def check_condition(member,roles):
+def check_condition(member,roles,not_roles=None):
     if len(roles)==0:return False
     for i in roles:
         if i not in member.roles:return False
+    if type(not_roles)!=type(None):
+        for i in not_roles:
+            if i in member.roles:return False
     return True
 
 #そのギルド内のメンバーで、targetsリストにあるロールすべて持っているメンバーを返す
 #targetsにメンバーが含まれている場合、そのメンバー＋指定ロールを持っている人となる
-def get_targets(guild,targets):
+def get_targets(guild,targets,not_targets=None):
     target_roles=[]
     target_members=[]
     target_mentions=[]
+    not_target_roles=[]
+    not_target_members=[]
+    not_target_mentions=[]
     for target in targets:
         id=target.strip("<!&@>")#argはroleもしくはmember がstr形式で送られてくるので、id(int)を抽出する
         role_=guild.get_role(int(id))
@@ -91,8 +97,21 @@ def get_targets(guild,targets):
         elif type(member_) is not type(None):#指定がメンバーのとき
             target_members.append(member_)
             target_mentions.append(member_.mention)
+    if type(not_targets)!=type(None):
+        for target in not_targets:
+            id=target.strip("<!&@>")#argはroleもしくはmember がstr形式で送られてくるので、id(int)を抽出する
+            role_=guild.get_role(int(id))
+            member_=guild.get_member(int(id))
+            if type(role_) is not type(None):#指定がロールのとき
+                not_target_roles.append(role_)
+                not_target_mentions.append(role_.mention)
+            elif type(member_) is not type(None):#指定がメンバーのとき
+                not_target_roles.append(member_)
+                not_target_mentions.append(member_.mention)
+
     for member in guild.members:
-        if check_condition(member,target_roles):
-            if member not in target_members:#すでに入ってたら２重に送信しないようスキップ
-                target_members.append(member)
-    return target_members,target_mentions
+        if member in not_target_members:continue
+        if check_condition(member,target_roles,not_target_roles):
+            if member in target_members:continue#すでに入ってたら２重に送信しないようスキップ
+            target_members.append(member)
+    return target_members,target_mentions,not_target_mentions

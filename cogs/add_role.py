@@ -4,6 +4,8 @@ import config
 import sys
 import asyncio 
 
+import requests
+
 class AddRole(commands.Cog):
     def __init__(self,bot):
         self.bot=bot

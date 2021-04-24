@@ -3,6 +3,7 @@ import discord
 import config
 import sys
 import asyncio 
+import requests
 
 class ClientAppInfo(commands.Cog):
     def __init__(self,bot):

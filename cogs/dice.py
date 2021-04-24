@@ -4,6 +4,28 @@ import config
 import sys
 import asyncio 
 import random 
+import requests
+
+json = {
+    "name": "dice",
+    "description": "さいころを振ります",
+    "options": [
+        {
+            "name": "dice",
+            "description": "ダイスのタイプ（例 1d3）",
+            "type": 3,
+            "required": True,
+        }
+    ]
+}
+
+# For authorization, you can use either your bot token 
+headers = {
+    "Authorization": f"Bot {config.TOKEN}"
+}
+
+#r = requests.post(config.SLASH_URL, headers=headers, json=json)
+#print(r.json())
 
 class Dice(commands.Cog):
     def __init__(self,bot):

@@ -4,6 +4,32 @@ import config
 import sys
 import asyncio 
 import random 
+import requests
+
+"""
+type
+1 SUB_COMMAND
+2 SUB_COMMAND_GROUP
+3 STRING
+4 INTEGER
+5 BOOLEAN
+6 USER
+7 CHANNEL
+8 ROLE
+"""
+
+json = {
+    "name": "メスガキ",
+    "description": "メスガキがよ...",
+}
+
+# For authorization, you can use either your bot token 
+headers = {
+    "Authorization": f"Bot {config.TOKEN}"
+}
+
+#r = requests.post(config.SLASH_URL, headers=headers, json=json)
+#print(r.json())
 
 class Mesugaki(commands.Cog):
     def __init__(self,bot):

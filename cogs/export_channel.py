@@ -7,6 +7,40 @@ import random
 import csv
 import os
 import datetime
+import requests
+
+"""
+type
+1 SUB_COMMAND
+2 SUB_COMMAND_GROUP
+3 STRING
+4 INTEGER
+5 BOOLEAN
+6 USER
+7 CHANNEL
+8 ROLE
+"""
+
+json = {
+    "name": "export_channel",
+    "description": "対象のチャンネルのテキストをcsv形式で保存します",
+    "options": [
+        {
+            "name": "channel",
+            "description": "対象のチャンネル。指定しない場合、そのコマンドを入力したチャンネルが対象",
+            "type": 7,
+            "required": False,
+        }
+    ]
+}
+
+# For authorization, you can use either your bot token 
+headers = {
+    "Authorization": f"Bot {config.TOKEN}"
+}
+
+#r = requests.post(config.SLASH_URL, headers=headers, json=json)
+#print(r.json())
 
 class TextData:
     def __init__(self,author,content,created_time,edited_time):

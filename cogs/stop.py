@@ -5,6 +5,40 @@ import sys
 import asyncio 
 import random 
 import utility
+import requests
+
+"""
+type
+1 SUB_COMMAND
+2 SUB_COMMAND_GROUP
+3 STRING
+4 INTEGER
+5 BOOLEAN
+6 USER
+7 CHANNEL
+8 ROLE
+"""
+
+json = {
+    "name": "stop",
+    "description": "Botを停止させる",
+    "options": [
+        {
+            "name": "option",
+            "description": "確認メッセージを表示させない",
+            "type":3,
+            "required": False,
+        }
+    ]
+}
+
+# For authorization, you can use either your bot token 
+headers = {
+    "Authorization": f"Bot {config.TOKEN}"
+}
+
+#r = requests.post(config.SLASH_URL, headers=headers, json=json)
+#print(r.json())
 
 class Stop(commands.Cog):
     def __init__(self,bot):

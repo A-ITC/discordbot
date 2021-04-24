@@ -4,6 +4,7 @@ import config
 import utility
 import sys
 import asyncio 
+import requests
 
 class CountMembers(commands.Cog):
     def __init__(self,bot):
@@ -14,23 +15,33 @@ class CountMembers(commands.Cog):
     async def count_members(self, ctx ,*roles_):
         self.count+=1
         targets=[]
+        not_targets=[]
         for role in roles_:
             print(role)
-            role_num=role.strip("<!&@>")
+            if role[0]=="!":
+                role.lstrip("!")
+                role_num=role.strip("<!&@>")
+                role_id=ctx.guild.get_role(int(role_num))
+                not_targets.append(role_id)
+            else:
+                role_num=role.strip("<!&@>")
+                role_id=ctx.guild.get_role(int(role_num))
+                targets.append(role_id)
             print(role_num)
-            role_id=ctx.guild.get_role(int(role_num))
-            targets.append(role_id)
 
         num=0
         print(targets)
         
         for member in ctx.guild.members:
-            if utility.check_condition(member,targets):num+=1
+            if utility.check_condition(member,targets,not_targets):num+=1
         
         role_str=""
         for i in targets:
             role_str+=i.mention+" "
-        await ctx.reply(f"役職 '{role_str}' を持っているメンバー数: {num} 人 / {ctx.guild.member_count} 人")
+        not_role_str=""
+        for i in not_targets:
+            not_role_str+=i.mention+" "
+        await ctx.reply(f"役職 '{role_str}' を持っている{not_role_str}のないメンバー数: {num} 人 / {ctx.guild.member_count} 人")
 
 def setup(bot):
     bot.add_cog(CountMembers(bot))
