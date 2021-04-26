@@ -25,7 +25,7 @@ class ITCBot(commands.Bot):
 intents = discord.Intents.default()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 intents.members=True
-
+intents.presences =True
 print("build bot")
 #botインスタンスの作成
 bot = ITCBot(command_prefix=["!","！","/"],intents=intents)
@@ -92,8 +92,8 @@ async def get_guilds(ctx):
     await ctx.send(bot.guilds)
 
 import csv
-import datetime
 import os
+from datetime import datetime, timedelta, timezone
 check_interval=60*30
 @tasks.loop(seconds=check_interval)#30分に一回
 async def check_online():
@@ -111,8 +111,12 @@ def check_online_guild(guild):
         if role.hoist:#そのロールが他のロールと分けて表示に設定されてたら
             if role.name not in data:#新しくロールが作られた場合
                 data[role.name]=["" for i in range(nrow)]
-            data[role.name].append(len(role.members))
-    now=datetime.datetime.now().strftime('%m/%d %H:%M:%S')
+            online_count=0
+            for member in role.members:
+                if member.status == discord.Status.online:online_count+=1
+            data[role.name].append(online_count)
+    JST = timezone(timedelta(hours=+9), 'JST')
+    now=datetime.now(JST).strftime('%m/%d %H:%M:%S')
     data["time"].append(now)
     if not os.path.exists(dir_path):#
         print("ディレクトリがありません")
@@ -163,7 +167,6 @@ def write_csv(path,data):
             for i in range(nrow):
                 output[i].append(data[v][i])
         for i in output:
-            print(f"書き込む内容 {i}")
             writer.writerow(i)
 
 check_online.start()
