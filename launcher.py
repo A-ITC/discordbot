@@ -41,6 +41,7 @@ bot.load_extension("cogs.join")
 bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.reload") 
 bot.load_extension("cogs.send") 
+bot.load_extension("cogs.statistics") 
 bot.load_extension("cogs.stop")
 bot.load_extension("cogs.おみくじ")
 bot.load_extension("cogs.ほめる")
@@ -86,10 +87,85 @@ async def on_voice_state_update(member,before,after):
     except Exception as e:
         print(e)
 
-
 @bot.command()
 async def get_guilds(ctx):
     await ctx.send(bot.guilds)
 
+import csv
+import datetime
+import os
+check_interval=60*30
+@tasks.loop(seconds=check_interval)#30分に一回
+async def check_online():
+    print("check loop")
+    for guild in bot.guilds:
+        check_online_guild(guild)
+        
+def check_online_guild(guild):
+    filename=guild.name
+    dir_path="data"
+    path=f"{dir_path}/{filename}.csv"
+    data=read_csv(path)
+    nrow=len(data["time"])#データの行数
+    for role in guild.roles:
+        if role.hoist:#そのロールが他のロールと分けて表示に設定されてたら
+            if role.name not in data:#新しくロールが作られた場合
+                data[role.name]=["" for i in range(nrow)]
+            data[role.name].append(len(role.members))
+    now=datetime.datetime.now().strftime('%m/%d %H:%M:%S')
+    data["time"].append(now)
+    if not os.path.exists(dir_path):#
+        print("ディレクトリがありません")
+        os.mkdir(dir_path)
+    print(f"{guild.name}について書き込みます")
+    write_csv(path,data)
+
+def read_csv(path):
+    data={"time":[]}
+    headers=[]#最初の要素は時間
+    if not os.path.exists(path):return data#ファイルがなかったらとばす
+    with open(path, 'r', encoding='utf-8') as f:
+        print(f"既存のファイルが確認されました。{path}から読み込みます。")
+        reader = csv.reader(f)
+        is_header=False
+        for row in reader:
+            if not is_header:#最初の行（ヘッダー）
+                is_header=True
+                headers.extend(row)
+                for header in headers:data[header]=[]
+                continue
+            if len(row)!=len(headers):
+                print("フォーマットエラー")
+                print(headers)
+                print(row)
+                break#rowのデータ数がヘッダ数とあってなかったら強制終了
+            count=0
+            for dat in row:
+                data[headers[count]].append(dat)
+                count+=1
+        print(f"ヘッダー {headers}")
+        return data
+
+def write_csv(path,data):
+    with open(path, 'w', encoding='utf-8', newline="") as f:
+        writer = csv.writer(f)
+        headers=["time"]#ヘッダーの最初はtimeがくるように
+        for i in data.keys():#ヘッダーに各ロール名を登録
+            if i =="time":continue
+            headers.append(i)
+        writer.writerow(headers)#ヘッダーを記入
+        output=[]
+        nrow=len(data["time"])#データの行数
+        for i in range(nrow):
+            output.append([ data["time"][i] ])#最初の列はtimeに
+        for v in data.keys():
+            if v=="time":continue
+            for i in range(nrow):
+                output[i].append(data[v][i])
+        for i in output:
+            print(f"書き込む内容 {i}")
+            writer.writerow(i)
+
+check_online.start()
 print("start run")
 bot.run(config.TOKEN)#Botのトークン

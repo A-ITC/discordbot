@@ -28,7 +28,7 @@ headers = {
     "Authorization": f"Bot {config.TOKEN}"
 }
 
-r = requests.post(config.SLASH_URL, headers=headers, json=json)
+#r = requests.post(config.SLASH_URL, headers=headers, json=json)
 
 json = {
     "name": "banish",
