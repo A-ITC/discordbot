@@ -5,7 +5,8 @@ import sys
 import asyncio 
 import requests
 import csv
-
+import os
+from discord.ext import tasks
 
 class Statistics(commands.Cog):
     def __init__(self,bot):
@@ -25,6 +26,12 @@ class Statistics(commands.Cog):
         dir="data"
         path=f"{dir}/{ctx.guild.name}.csv"
         await ctx.send("ファイルを出力します",file=discord.File(path))
+
+    @statistics.command()
+    async def clear(self,ctx):
+        dir="data"
+        path=f"{dir}/{ctx.guild.name}.csv"
+        os.remove(path)
 
 def setup(bot):
     bot.add_cog(Statistics(bot))
