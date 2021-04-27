@@ -53,9 +53,13 @@ bot.load_extension("cogs.天気")
 @bot.event
 async def on_message(message):
     try:
-        if message.author.bot: # メッセージの送信者がBotなら何もしない
-            return
-        #print(message.reference)
+        if message.author.bot:return # メッセージの送信者がBotなら何もしない
+        print(message.channel)
+        if isinstance(message.channel,discord.channel.DMChannel):
+            channel = bot.get_channel(config.PRIVATE_CHANNEL)
+            mes=f"{message.author.mention}からのメッセージがDMから送られてきました。\n"
+            mes+=message.content
+            await channel.send(mes)
         await bot.process_commands(message)
     except Exception as e:
         print(e)

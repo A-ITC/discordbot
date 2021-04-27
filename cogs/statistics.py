@@ -43,19 +43,33 @@ class Statistics(commands.Cog):
             channel=channel_.strip("<#>")
             channel=ctx.guild.get_channel(int(channel))
         user_data={}
-        # 受け取ったメッセージの内容を使って返信
-        embed = discord.Embed(title=f"ユーザーリアクション")
-        # Embed の表示色を青色に設定
-        embed.color = config.EMBED_COLOR
         async with ctx.channel.typing():
             async for message in channel.history(limit=200):
                 for reaction in message.reactions:
                     async for user in reaction.users():
                         if user.name not in user_data: user_data[user.name]=0
                         user_data[user.name]+=1
+            res=""
             for key,value in user_data.items():
-                embed.add_field(name=key, value=value,inline=False)
-            await ctx.reply(embed=embed)
+                res+=f"{key}    :    {value}\n"
+            await ctx.reply(res)
+    @stat.command()
+    async def count_message(self,ctx,channel_):
+        channel=channel_
+        if type(channel)is type(None):
+            channel=ctx.channel
+        else:
+            channel=channel_.strip("<#>")
+            channel=ctx.guild.get_channel(int(channel))
+        user_data={}
+        async with ctx.channel.typing():
+            async for message in channel.history(limit=200):
+                if message.author not in user_data: user_data[message.author]=0
+                user_data[message.author]+=1
+            res=""
+            for key,value in user_data.items():
+                res+=f"{key}    :    {value}\n"
+            await ctx.reply(res)
 
     @stat.command()
     async def count_online(self,ctx):
