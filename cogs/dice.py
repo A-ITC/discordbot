@@ -37,7 +37,7 @@ class Dice(commands.Cog):
         self.count+=1
         num=content.split("d")
         if len(num)<2:
-            await ctx.reply("入力がおかしいです。*d*としてください。（半角数字）")
+            await ctx.reply("入力がおかしいです。*d*としてください。例 1d43")
             return
         # 受け取ったメッセージの内容を使って返信
         embed = discord.Embed(title=f"ダイス : {content}")
@@ -50,6 +50,7 @@ class Dice(commands.Cog):
             value=random.randint(1,int(num[1]))
             embed.add_field(name=f"{i+1}ダイス目", value=value,inline=False)
             sum+=value
+        embed.set_thumbnail(url="https://www.ed.tus.ac.jp/tusitclub/discord/dice.png")
         embed.add_field(name="合計", value=sum,inline=False)
         await ctx.reply(embed=embed)
 def setup(bot):

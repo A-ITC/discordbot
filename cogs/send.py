@@ -93,7 +93,7 @@ class Send(commands.Cog):
                 retryFlag = await self.await_responce(ctx,target_members,sent_msg)
                 if not retryFlag:return#キャンセルされたらコマンドを終了
                 #再確認
-                sent_msg= await self.send_message(ctx,target_mentions)
+                sent_msg= await self.send_message(ctx,target_mentions,not_target_memtions)
                 self.waiting_message=True
         except asyncio.TimeoutError:
             await ctx.send(f"タイムアウトしました。")
@@ -104,7 +104,9 @@ class Send(commands.Cog):
     async def send_message(self,ctx,target_mentions,not_target_memtions):
         targets="\n".join(target_mentions)
         not_targets="\n".join(not_target_memtions)
-        sent_msg=await ctx.reply(f"'{targets}' に DM を一斉送信します。{not_targets}には送信しません。内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
+        if len(not_target_memtions)!=0:
+            not_targets+="には送信しません。"
+        sent_msg=await ctx.reply(f"'{targets}' に DM を一斉送信します。{not_targets}内容を記入が終わりましたら「✅」、キャンセルする場合は「❌」とリアクションしてください。")
         self.waiting_message=True
         return sent_msg
 

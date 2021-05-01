@@ -41,7 +41,9 @@ class CountMembers(commands.Cog):
         not_role_str=""
         for i in not_targets:
             not_role_str+=i.mention+" "
-        await ctx.reply(f"役職 '{role_str}' を持っている{not_role_str}のないメンバー数: {num} 人 / {ctx.guild.member_count} 人")
+        if len(not_targets)!=0:
+            not_role_str+="のない"
+        await ctx.reply(f"役職 '{role_str}' を持っている{not_role_str}メンバー数: {num} 人 / {ctx.guild.member_count} 人")
 
 def setup(bot):
     bot.add_cog(CountMembers(bot))

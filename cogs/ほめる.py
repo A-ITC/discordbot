@@ -37,8 +37,10 @@ class Encourage(commands.Cog):
         self.count=0
                 
     @commands.command()
-    async def ほめる(self,ctx):
+    async def ほめる(self,ctx,target:discord.Member=None):
         self.count+=1
+        if target==None:
+            target=ctx.author
         texts=[
             "えらい！！！",
             "天才すぎ",
@@ -58,17 +60,18 @@ class Encourage(commands.Cog):
             "ファミチキください",
             "GREAT WORKS!!!!!!!",
             "最強が服着てあるいてる！",
-            "仕上がってるよ！"
+            "仕上がってるよ！",
+            "チョベリグ"
             ]
         async with ctx.channel.typing():
-            await ctx.reply(random.choice(texts))
+            await ctx.reply(f"{target.mention} {random.choice(texts)}")
             
     @commands.command()
-    async def ほめて(self,ctx):
-        await self.ほめる(ctx)
+    async def ほめて(self,ctx,target:discord.Member=None):
+        await self.ほめる(ctx,target)
     @commands.command()
-    async def ほめろ(self,ctx):
-        await self.ほめる(ctx)
+    async def ほめろ(self,ctx,target:discord.Member=None):
+        await self.ほめる(ctx,target)
         
 def setup(bot):
     bot.add_cog(Encourage(bot))

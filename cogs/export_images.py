@@ -17,6 +17,7 @@ class TextData:
         self.created_time=created_time
         self.edited_time=edited_time
 
+#未実装
 class ExportImage(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
