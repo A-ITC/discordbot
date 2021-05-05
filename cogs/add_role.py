@@ -5,6 +5,7 @@ import sys
 import asyncio 
 
 import requests
+import utility
 
 class AddRole(commands.Cog):
     def __init__(self,bot):
@@ -14,23 +15,38 @@ class AddRole(commands.Cog):
     @commands.command()
     async def add_role(self,ctx,target_role_:discord.Role,new_role_:discord.Role):
         self.count+=1
-        sent_msg = await ctx.reply(f"{target_role_.name} を持つ人全員に {new_role_.name} を追加します。よろしいですか？\nこのコマンドはやり直しができません。")
-        await sent_msg.add_reaction("✅")
-        await sent_msg.add_reaction("❌")
+        sent_msg = await ctx.reply(f"{target_role_.name} を持つ人全員に {new_role_.name} のロールを追加します。よろしいですか？")
         try:
-            def reaction_check(reaction_, user_):
-                is_author=user_==ctx.author
-                are_same_messages = reaction_.message.channel == sent_msg.channel and reaction_.message.id == sent_msg.id
-                return are_same_messages and is_author
-            emoji = await self.bot.wait_for('reaction_add', check=reaction_check, timeout=180)
-            if emoji[0].emoji=="✅":
+            flag=await utility.check_yes_no(self.bot,ctx,sent_msg)
+            if flag:
                 await ctx.send("追加します。")
-                return
-            if emoji[0].emoji=="❌":
+                for member in target_role_.members:
+                    await member.add_roles(new_role_,reason="bot.add_role")
+                await ctx.send("追加しました。")
+            else:
                 await ctx.send("キャンセルします。")
                 return
         except asyncio.TimeoutError as e:
             await ctx.send("タイムアウトしました。")
             return
+
+    @commands.command()
+    async def remove_role(self,ctx,target_role_:discord.Role,new_role_:discord.Role):
+        self.count+=1
+        sent_msg = await ctx.reply(f"{target_role_.name} を持つ人全員から {new_role_.name} のロールを削除します。よろしいですか？")
+        try:
+            flag=await utility.check_yes_no(self.bot,ctx,sent_msg)
+            if flag:
+                await ctx.send("削除します。")
+                for member in target_role_.members:
+                    await member.remove_roles(new_role_,reason="bot.remove_role")
+                await ctx.send("削除しました。")
+            else:
+                await ctx.send("キャンセルします。")
+                return
+        except asyncio.TimeoutError as e:
+            await ctx.send("タイムアウトしました。")
+            return
+    
 def setup(bot):
     bot.add_cog(AddRole(bot))

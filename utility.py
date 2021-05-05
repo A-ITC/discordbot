@@ -5,7 +5,7 @@ import sys
 import asyncio 
 import random 
 
-async def check_yes_no(bot,ctx,message,timeout=300):
+async def check_yes_no(bot,ctx,message,timeout=300)-> bool:
     await message.add_reaction("✅")
     await message.add_reaction("❌")
     def reaction_check(reaction_, user_):
@@ -115,3 +115,11 @@ def get_targets(guild,targets,not_targets=None):
             if member in target_members:continue#すでに入ってたら２重に送信しないようスキップ
             target_members.append(member)
     return target_members,target_mentions,not_target_mentions
+
+import requests
+#https://qiita.com/mizunana/items/4afddc71f37df555078e
+def download_img(url, file_name):
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open(file_name, 'wb') as f:
+            f.write(r.content)

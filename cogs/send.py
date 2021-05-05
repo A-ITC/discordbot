@@ -5,7 +5,7 @@ import sys
 import asyncio 
 import utility
 import requests
-
+import os
 """
 type
 1 SUB_COMMAND
@@ -55,16 +55,20 @@ class Send(commands.Cog):
         self.message=""
         self.count=0
         self.target_person=None#その人にしか送信できないように
+        self.files=[]
     
     #https://discordpy.readthedocs.io/ja/latest/ext/commands/commands.html
     @commands.command()
     async def send(self, ctx,*arg):
         self.count+=1
+        self.files=[]
         if type(arg) is type(None):
             await ctx.reply("送信先が指定されていません")
             return
         targets=[]
         not_targets=[]
+        self.message=""
+        self.waiting_message=False
         for t in arg:
             print(t)
             if t[0]=="!":
@@ -98,7 +102,6 @@ class Send(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.send(f"タイムアウトしました。")
             self.waiting_message=False
-            self.message=""
             return
 
     async def send_message(self,ctx,target_mentions,not_target_memtions):
@@ -115,11 +118,12 @@ class Send(commands.Cog):
         if not send_flag:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
-            self.message=""
             return None,False
         member_str=""
         for target in target_members:
             member_str+=f"{target.mention}\n"
+        files=[]
+        for i in self.files:files.append(discord.File(i))
         sent_msg= await ctx.send(
             f"完了が確認されました。以下の内容でよろしいでしょうか？\n"
             f"=======================\n"
@@ -129,7 +133,7 @@ class Send(commands.Cog):
             f"{member_str}"
             f"です。\n"
             f"よろしければもう一度「✅」、キャンセルし編集を続ける場合は「♻」、コマンドを終了する場合は「❌」とリアクションしてください。"
-            )
+           ,files=files)
         self.waiting_message=False
         return sent_msg,True
 
@@ -138,25 +142,32 @@ class Send(commands.Cog):
         if state==0:
             await ctx.send("キャンセルされました。終了します。")
             self.waiting_message=False
-            self.message=""
             return False
         if state==1:
-            await ctx.send("送信します。")
             if self.message =="":
                 await ctx.send("空メッセージは送信できません。終了します")
                 return False
-            for i in target_members:
-                await i.send(content=self.message)
+            await ctx.send("送信します。")
+            for member in target_members:
+                files=[]
+                for i in self.files:files.append(discord.File(i))
+                await member.send(content=self.message,files=files)
+            for i in self.files:os.remove(i)
             await ctx.send("送信が完了しました。")
             return False
         if state==-1:
             await ctx.send("編集を続けてください。")
             return True
+
     @commands.Cog.listener("on_message")
     async def on_message(self,message):
         if not self.waiting_message:return
         if message.author != self.target_person:return
         self.message += message.content + "\n"
-
+        for attachment in message.attachments:
+            save_name= f"{attachment.filename}"
+            utility.download_img(attachment.url,save_name)
+            self.files.append(save_name)
+                    
 def setup(bot):
     bot.add_cog(Send(bot))
