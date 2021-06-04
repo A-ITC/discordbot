@@ -8,36 +8,14 @@ import traceback
 from discord.ext import tasks
 import csv
 import os
+import account
 from datetime import datetime, timedelta, timezone
-
-#https://qiita.com/saira/items/e08c8849cea6c3b5eb0c
-import sqlite3
-
-dbname = 'TEST.db'
-conn = sqlite3.connect(dbname)
-# sqliteを操作するカーソルオブジェクトを作成
-cur = conn.cursor()
-cur.execute("select * from sqlite_master where type='table'")
-print(cur.fetchall())
-
-# personsというtableを作成してみる
-cur.execute('CREATE TABLE persons(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)')
-cur.execute('INSERT INTO persons(name) values("Taro")')
-# データベースへコミット。これで変更が反映される。
-conn.commit()
-
-# terminalで実行したSQL文と同じようにexecute()に書く
-cur.execute('SELECT * FROM persons')
-
-# 中身を全て取得するfetchall()を使って、printする。
-print(cur.fetchall())
-conn.close()
 
 class ITCBot(commands.Bot):
     def __init__( self,command_prefix,**options):
-        self.voice_count=0
-        self.before_count=0
         super().__init__(command_prefix=command_prefix,  **options)
+        self.voice_count=0
+        #self.accounts=account.AccountManager()
 
     # Botの準備完了時に呼び出されるイベント
     async def on_ready(self):
@@ -60,6 +38,7 @@ bot.load_extension("cogs.export_channel")
 bot.load_extension("cogs.export_images")
 bot.load_extension("cogs.get_roles") 
 bot.load_extension("cogs.info") 
+bot.load_extension("cogs.info2") 
 bot.load_extension("cogs.join") 
 #bot.load_extension("cogs.move_messages") 
 bot.load_extension("cogs.member_list_up") 
@@ -72,7 +51,7 @@ bot.load_extension("cogs.おみくじ")
 bot.load_extension("cogs.ほめる")
 bot.load_extension("cogs.メスガキ")
 bot.load_extension("cogs.召喚")
-bot.load_extension("cogs.天気")
+#bot.load_extension("cogs.天気")
 
 @bot.event
 async def on_message(message):
@@ -83,8 +62,9 @@ async def on_message(message):
             mes=f"{message.author.mention}からのメッセージがDMから送られてきました。以下内容\n"
             mes+="=========================\n"
             mes+=message.content
-            mes+="=========================\n"
+            mes+="\n=========================\n"
             await channel.send(mes)
+        #bot.accounts.on_message(message)
         await bot.process_commands(message)
     except Exception as e:
         print(e)
@@ -109,23 +89,38 @@ async def on_voice_state_update(member,before,after):
         voiceChannels = list(filter(check_channel ,member.guild.channels))
         print(f"channel count : {len(voiceChannels)}")
         for channel in voiceChannels : count += len(channel.members)
-        bot.voice_count=count
         text=""
         if count!=0:text=f"{count}人の通話"
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=text))
+        #bot.accounts.on_voice_update(member, before, after)
     except Exception as e:
         print(e)
 
 @bot.event
 async def on_member_update(before, after):
     JST = timezone(timedelta(hours=+9), 'JST')
-    now=datetime.now(JST).strftime('%y/%m/%d %H:%M:%S')
-    print(now)
-    print(before.name)
-    print("before")
-    print(f"mobile {before.mobile_status} desktop {before.desktop_status} web {before.web_status}")
-    print("after")
-    print(f"mobile {after.mobile_status} desktop {after.desktop_status} web {after.web_status}")
+    now=datetime.now(JST)
+    #print(now.strftime('%y/%m/%d %H:%M:%S'))
+    #print(before.name)
+    #print("before")
+    #print(f"mobile {before.mobile_status} desktop {before.desktop_status} web {before.web_status}")
+    #print("after")
+    #print(f"mobile {after.mobile_status} desktop {after.desktop_status} web {after.web_status}")
+    #bot.accounts.on_status_update(before,after)
+
+@bot.event
+async def on_member_remove(member):
+    channel = bot.get_channel(config.REMOVE_NOTION)
+    roles=""
+    for role in member.roles:
+        roles+=role.mention+"\n"
+    await channel.send(f"{member.mention} {member.name}が脱退しました。\n{roles}")
 
 print("start run")
 bot.run(config.TOKEN)#Botのトークン
+
+import message
+check_interval=60*60*12 #秒*分*時間
+@tasks.loop(seconds=check_interval)#30分に一回
+async def check_atcoder():
+    message.check_atcoder()

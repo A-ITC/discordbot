@@ -14,14 +14,37 @@ class Weather(commands.Cog):
     async def 天気(self,ctx):
         self.count+=1
         texts=[
-            "天気？分かりませんよそんなん",
-            "晴か曇りか雨か雪かその他でしょう",
-            "Coming soon!",
-            "yahoo newsがおススメですよ！",
-            "https://weathernews.jp/onebox/35.55/139.58/temp=c"
+            "烈日",
+            "快晴",
+            "蒼天",
+            "雹",
+            "霰",
+            "霧",
+            "疎雨",
+            "晴れ",
+            "曇り",
+            "花曇り",
+            "雨",
+            "霧雨",
+            "風雨",
+            "晴嵐",
+            "川霧",
+            "台風",
+            "雪",
+            "凪",
+            "黄砂",
+            "梅雨",
+            "極光",
+            "ダイヤモンドダスト",
+            "天気雨",
+            "萃雨",
+            "蜃気楼",
+            "濃霧",
+            "虹",
+            ""
             ]
         async with ctx.channel.typing():
-            await ctx.reply(random.choice(texts))
+            await ctx.reply(f"{random.choice(texts)}かもしれません。")
 
         
 def setup(bot):

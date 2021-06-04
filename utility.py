@@ -18,7 +18,8 @@ async def check_yes_no(bot,ctx,message,timeout=300)-> bool:
     if emoji[0].emoji=="❌":
         return False
     return None
-async def check_yes_no_cancel(bot,ctx,message,timeout=300):
+
+async def check_yes_no_cancel(bot,ctx,message,timeout=300) -> int:
     await message.add_reaction("✅")
     await message.add_reaction("♻")
     await message.add_reaction("❌")
@@ -35,7 +36,7 @@ async def check_yes_no_cancel(bot,ctx,message,timeout=300):
         return 0
     return None
 
-async def yes_no(bot,ctx,text,timeout=300):
+async def yes_no(bot,ctx,text,timeout=300) -> bool:
     sent_msg=await ctx.reply(text)
     await sent_msg.add_reaction("✅")
     await sent_msg.add_reaction("❌")
@@ -50,7 +51,7 @@ async def yes_no(bot,ctx,text,timeout=300):
         return False
     return None
         
-async def yes_no_cancel(bot,ctx,text,timeout=300):
+async def yes_no_cancel(bot,ctx,text,timeout=300) -> int:
     sent_msg=await ctx.reply(text)
     await sent_msg.add_reaction("✅")
     await sent_msg.add_reaction("♻")
@@ -69,7 +70,7 @@ async def yes_no_cancel(bot,ctx,text,timeout=300):
     return None
 
 #そのmemberがrolesをすべて持っていたらtrue
-def check_condition(member,roles,not_roles=None):
+def check_condition(member,roles,not_roles=None) -> bool:
     if len(roles)==0:return False
     for i in roles:
         if i not in member.roles:return False
@@ -111,9 +112,9 @@ def get_targets(guild,targets,not_targets=None):
 
     for member in guild.members:
         if member in not_target_members:continue
-        if check_condition(member,target_roles,not_target_roles):
-            if member in target_members:continue#すでに入ってたら２重に送信しないようスキップ
-            target_members.append(member)
+        if not check_condition(member,target_roles,not_target_roles): continue
+        if member in target_members:continue#すでに入ってたら２重に送信しないようスキップ
+        target_members.append(member)
     return target_members,target_mentions,not_target_mentions
 
 import requests

@@ -6,6 +6,7 @@ import asyncio
 import requests
 import csv
 import os
+import shutil
 from discord.ext import tasks
 
 class Statistics(commands.Cog):
@@ -70,6 +71,10 @@ class Statistics(commands.Cog):
             for key,value in user_data.items():
                 res+=f"{key}    :    {value}\n"
             await ctx.reply(res)
+
+    @stat.command()
+    async def delete_account_data(self,ctx,path):
+        shutil.rmtree(path)
 
     @stat.command()
     async def count_online(self,ctx):
