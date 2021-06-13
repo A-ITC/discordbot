@@ -18,15 +18,13 @@ class CountMembers(commands.Cog):
         not_targets=[]
         for role in roles_:
             print(role)
-            if role[0]=="!":
+            if role[0]=="!":#NOT
                 role.lstrip("!")
                 role_num=role.strip("<!&@>")
-                role_id=ctx.guild.get_role(int(role_num))
-                not_targets.append(role_id)
+                not_targets.append(ctx.guild.get_role(int(role_num)))
             else:
                 role_num=role.strip("<!&@>")
-                role_id=ctx.guild.get_role(int(role_num))
-                targets.append(role_id)
+                targets.append(ctx.guild.get_role(int(role_num)))
             print(role_num)
 
         num=0

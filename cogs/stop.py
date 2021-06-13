@@ -7,38 +7,22 @@ import random
 import utility
 import requests
 
-"""
-type
-1 SUB_COMMAND
-2 SUB_COMMAND_GROUP
-3 STRING
-4 INTEGER
-5 BOOLEAN
-6 USER
-7 CHANNEL
-8 ROLE
-"""
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option
 
-json = {
-    "name": "stop",
-    "description": "Botを停止させる",
-    "options": [
-        {
-            "name": "option",
-            "description": "確認メッセージを表示させない",
-            "type":3,
-            "required": False,
-        }
+texts=[
+    "ミ゜（絶命）",
+    "Botを終了します。",
+    "さよなら…さよなら…",
+    "😴",
+    "👋",
+    "Bot has been stoped.",
+    "Farewell, everyone",
+    "Bot休止了",
+    "死にたくない…死にたくない…",
+    "Sleeping",
+    "ぐあああああっ"
     ]
-}
-
-# For authorization, you can use either your bot token 
-headers = {
-    "Authorization": f"Bot {config.TOKEN}"
-}
-
-#r = requests.post(config.SLASH_URL, headers=headers, json=json)
-#print(r.json())
 
 class Stop(commands.Cog):
     def __init__(self,bot):
@@ -49,19 +33,6 @@ class Stop(commands.Cog):
     @commands.command()
     async def stop(self,ctx,option=None):
         self.count+=1
-        texts=[
-            "ミ゜（絶命）",
-            "Botを終了します。",
-            "さよなら…さよなら…",
-            "😴",
-            "👋",
-            "Bot has been stoped.",
-            "Farewell, everyone",
-            "Bot休止了",
-            "死にたくない…死にたくない…",
-            "Sleeping",
-            "ぐあああああっ"
-            ]
         try:
             if type(option)==type(None):
                 stop_flag=await utility.yes_no(self.bot,ctx,"Botを停止させますか？")
@@ -76,6 +47,29 @@ class Stop(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.send(f"タイムアウトしました。")
         #await self.bot.logout()
+
+    @cog_ext.cog_slash(name="stop",  description= "Botを終了します。",options=[
+            create_option(
+                name="option",
+                description="確認メッセージを省略します",
+                option_type=3,
+                required=False
+            )
+            ],guild_ids=config.guild_ids)
+    async def _stop(self, ctx: SlashContext, option: str=None):
+        try:
+            if type(option)==type(None):
+                stop_flag=await utility.yes_no(self.bot,ctx,"Botを停止させますか？")
+                if stop_flag:
+                    await ctx.send(random.choice(texts))
+                    await self.bot.close()
+                else:
+                    await ctx.send("キャンセルします。")
+            else:
+                await ctx.send(random.choice(texts))
+                await self.bot.close()
+        except asyncio.TimeoutError:
+            await ctx.send(f"タイムアウトしました。")
         
 def setup(bot):
     bot.add_cog(Stop(bot))

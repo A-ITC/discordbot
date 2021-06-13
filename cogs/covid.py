@@ -8,6 +8,8 @@ import requests
 import csv
 import io
 import os
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
 
 class Covid(commands.Cog):
     def __init__(self,bot):
@@ -76,6 +78,29 @@ class Covid(commands.Cog):
 
             await ctx.send(file=image_file)
             os.remove("tmp.png")
+
+    @cog_ext.cog_slash(name="covid",  description= "COVID-19の感染者数を表示します",options=[
+            create_option(
+                name="target",
+                description="どこの県か",
+                option_type=3,
+                required=False,
+            ),
+              create_option(
+                name="target_graph",
+                description="グラフに出力するか",
+                option_type=3,
+                required=False,
+                 choices=[
+                  create_choice(
+                    name="グラフ出力",
+                    value="-g"
+                  ),
+                ]
+            )
+            ],guild_ids=config.guild_ids)
+    async def _covid(self, ctx, target=None, target_graph=None):
+        await self.covid(ctx,target,target_graph)
 
 def setup(bot):
     bot.add_cog(Covid(bot))

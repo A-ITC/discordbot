@@ -10,16 +10,7 @@ import csv
 import os
 import account
 from datetime import datetime, timedelta, timezone
-
-class ITCBot(commands.Bot):
-    def __init__( self,command_prefix,**options):
-        super().__init__(command_prefix=command_prefix,  **options)
-        self.voice_count=0
-        #self.accounts=account.AccountManager()
-
-    # Botの準備完了時に呼び出されるイベント
-    async def on_ready(self):
-        print("on_ready")
+import ITCBot
 
 intents = discord.Intents.default()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
@@ -28,9 +19,12 @@ intents.presences =True
 
 print("build bot")
 #botインスタンスの作成
-bot = ITCBot(command_prefix=["!","！","/"],intents=intents)
+bot = ITCBot.ITCBot(command_prefix=["!","！","/"],intents=intents)
+from discord_slash import SlashCommand # Importing the newly installed library.
+
+slash = SlashCommand(bot, sync_commands=True, override_type=True) # Declares slash commands through the client.
+
 bot.load_extension("cogs.add_role") 
-#bot.load_extension("cogs.client_app_info") 
 bot.load_extension("cogs.count_members")
 bot.load_extension("cogs.covid")
 bot.load_extension("cogs.dice")
@@ -38,9 +32,7 @@ bot.load_extension("cogs.export_channel")
 bot.load_extension("cogs.export_images")
 bot.load_extension("cogs.get_roles") 
 bot.load_extension("cogs.info") 
-bot.load_extension("cogs.info2") 
 bot.load_extension("cogs.join") 
-#bot.load_extension("cogs.move_messages") 
 bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.reload") 
 bot.load_extension("cogs.send") 
@@ -51,7 +43,6 @@ bot.load_extension("cogs.おみくじ")
 bot.load_extension("cogs.ほめる")
 bot.load_extension("cogs.メスガキ")
 bot.load_extension("cogs.召喚")
-#bot.load_extension("cogs.天気")
 
 @bot.event
 async def on_message(message):
@@ -64,7 +55,6 @@ async def on_message(message):
             mes+=message.content
             mes+="\n=========================\n"
             await channel.send(mes)
-        #bot.accounts.on_message(message)
         await bot.process_commands(message)
     except Exception as e:
         print(e)
@@ -75,8 +65,6 @@ async def on_disconnect():
 
 @bot.event
 async def on_command_error(ctx, error):
-   # exc_type, exc_obj, exc_tb = sys.exc_info()
-    #await ctx.reply(traceback.format_exc())
     await ctx.reply(error)
 
 @bot.event
@@ -97,18 +85,6 @@ async def on_voice_state_update(member,before,after):
         print(e)
 
 @bot.event
-async def on_member_update(before, after):
-    JST = timezone(timedelta(hours=+9), 'JST')
-    now=datetime.now(JST)
-    #print(now.strftime('%y/%m/%d %H:%M:%S'))
-    #print(before.name)
-    #print("before")
-    #print(f"mobile {before.mobile_status} desktop {before.desktop_status} web {before.web_status}")
-    #print("after")
-    #print(f"mobile {after.mobile_status} desktop {after.desktop_status} web {after.web_status}")
-    #bot.accounts.on_status_update(before,after)
-
-@bot.event
 async def on_member_remove(member):
     channel = bot.get_channel(config.REMOVE_NOTION)
     roles=""
@@ -116,11 +92,10 @@ async def on_member_remove(member):
         roles+=role.mention+"\n"
     await channel.send(f"{member.mention} {member.name}が脱退しました。\n{roles}")
 
+
+@bot.event
+async def on_slash_command_error(ctx, ex):
+    await ctx.send(str(ex))
+
 print("start run")
 bot.run(config.TOKEN)#Botのトークン
-
-import message
-check_interval=60*60*12 #秒*分*時間
-@tasks.loop(seconds=check_interval)#30分に一回
-async def check_atcoder():
-    message.check_atcoder()
