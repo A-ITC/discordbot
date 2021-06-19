@@ -8,11 +8,9 @@ import random
 class Weather(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def 天気(self,ctx):
-        self.count+=1
         texts=[
             "烈日",
             "快晴",
