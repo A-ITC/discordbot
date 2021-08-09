@@ -40,12 +40,10 @@ headers = {
 class Reload(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.is_owner()
     @commands.command()
     async def reload(self, ctx, module_name):#cogs.***としないとエラー
-        self.count+=1
         async with ctx.channel.typing():
             await ctx.reply(f" モジュール {module_name} の再読み込みを開始します。")
         try:

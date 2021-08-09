@@ -25,7 +25,6 @@ from discord_slash.utils.manage_commands import create_option
 class Dice(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
 
     @commands.command()
     async def dice(self, ctx ,content):

@@ -53,14 +53,12 @@ class Send(commands.Cog):
         self.bot=bot
         self.waiting_message=False
         self.message=""
-        self.count=0
         self.target_person=None#その人にしか送信できないように
         self.files=[]
     
     #https://discordpy.readthedocs.io/ja/latest/ext/commands/commands.html
     @commands.command()
     async def send(self, ctx,*arg):
-        self.count+=1
         self.files=[]
         if type(arg) is type(None):
             await ctx.reply("送信先が指定されていません")

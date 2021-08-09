@@ -27,12 +27,10 @@ texts=[
 class Stop(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.is_owner()
     @commands.command()
     async def stop(self,ctx,option=None):
-        self.count+=1
         try:
             if type(option)==type(None):
                 stop_flag=await utility.yes_no(self.bot,ctx,"Botを停止させますか？")

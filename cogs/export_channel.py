@@ -52,11 +52,9 @@ class TextData:
 class ExportChannel(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
 
     @commands.command()
     async def export_channel(self, ctx ,channel_=None):
-        self.count+=1
         channel=channel_
         if type(channel)is type(None):
             channel=ctx.channel

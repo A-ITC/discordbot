@@ -52,13 +52,11 @@ from typing import Dict
 class Join(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
         self.vc=None
         self.channel=None
 
     @commands.command()
     async def join(self, ctx ):
-        self.count+=1
         voice_status=ctx.author.voice
         self.channel=voice_status.channel
         if type(voice_status)==type(None) or type(self.channel)==type(None):

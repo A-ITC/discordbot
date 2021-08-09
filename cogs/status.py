@@ -11,11 +11,9 @@ from discord_slash.utils.manage_commands import create_option
 class Status(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def status(self,ctx):
-        self.count+=1
         embed = discord.Embed(title=f"{ctx.author.name} のステータス")
         embed.color = config.EMBED_COLOR
         str_=random.randint(3, 20)#筋力

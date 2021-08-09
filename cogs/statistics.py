@@ -12,13 +12,11 @@ from discord.ext import tasks
 class Statistics(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
         self.vc=None
         self.channel=None
 
     @commands.group()
     async def stat(self, ctx ):
-        self.count+=1
         if ctx.invoked_subcommand is None:
             await ctx.reply('無効なコマンドです')
 

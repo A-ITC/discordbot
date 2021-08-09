@@ -48,11 +48,9 @@ headers = {
 class Info(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def info(self, ctx,target=None):
-        self.count+=1
         if type(target)is type(None):
             await self.guild(ctx)
             return

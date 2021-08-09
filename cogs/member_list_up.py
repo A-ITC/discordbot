@@ -43,13 +43,11 @@ class MemberListUp(commands.Cog):
         self.bot=bot
         self.waiting_message=False
         self.message=""
-        self.count=0
         self.target_person=None#その人にしか送信できないように
     
     #https://discordpy.readthedocs.io/ja/latest/ext/commands/commands.html
     @commands.command()
     async def member_list_up(self, ctx,*roles_):
-        self.count+=1
         if type(roles_)is type(None):
             await ctx.reply("ロールが指定されていません")
         targets=[]

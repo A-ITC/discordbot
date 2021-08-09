@@ -8,7 +8,6 @@ import traceback
 from discord.ext import tasks
 import csv
 import os
-import account
 from datetime import datetime, timedelta, timezone
 import ITCBot
 
@@ -30,11 +29,11 @@ bot.load_extension("cogs.covid")
 bot.load_extension("cogs.dice")
 bot.load_extension("cogs.export_channel")
 bot.load_extension("cogs.export_images")
-bot.load_extension("cogs.get_roles") 
 bot.load_extension("cogs.info") 
 bot.load_extension("cogs.join") 
 bot.load_extension("cogs.member_list_up") 
 bot.load_extension("cogs.reload") 
+bot.load_extension("cogs.retrieve_ids") 
 bot.load_extension("cogs.send") 
 bot.load_extension("cogs.statistics") 
 bot.load_extension("cogs.status") 
@@ -42,7 +41,6 @@ bot.load_extension("cogs.stop")
 bot.load_extension("cogs.おみくじ")
 bot.load_extension("cogs.ほめる")
 bot.load_extension("cogs.メスガキ")
-bot.load_extension("cogs.召喚")
 
 @bot.event
 async def on_message(message):
@@ -89,8 +87,8 @@ async def on_member_remove(member):
     channel = bot.get_channel(config.REMOVE_NOTION)
     roles=""
     for role in member.roles:
-        roles+=role.mention+"\n"
-    await channel.send(f"{member.mention} {member.name}が脱退しました。\n{roles}")
+        roles+=f"{role.mention} : {role.name}"+"\n"
+    await channel.send(f"{member.mention} {member.name} が脱退しました。\n{roles}")
 
 
 @bot.event

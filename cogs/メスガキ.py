@@ -31,11 +31,9 @@ texts=[
 class Mesugaki(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def メスガキ(self,ctx):
-        self.count+=1
         async with ctx.channel.typing():
             await ctx.reply(random.choice(texts))
             

@@ -14,7 +14,6 @@ from discord_slash.utils.manage_commands import create_option, create_choice
 class Covid(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
 
     @commands.command()
     async def covid(self, ctx, target=None, target_graph=None):

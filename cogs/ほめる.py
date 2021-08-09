@@ -34,11 +34,9 @@ texts=[
 class Encourage(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def ほめる(self,ctx,target:discord.Member=None):
-        self.count+=1
         if target==None:
             target=ctx.author
         async with ctx.channel.typing():

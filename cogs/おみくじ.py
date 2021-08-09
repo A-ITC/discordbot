@@ -66,11 +66,9 @@ rucky_items=[
 class Omikuji(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
                 
     @commands.command()
     async def おみくじ(self,ctx):
-        self.count+=1
 
         # 受け取ったメッセージの内容を使って返信
         embed = discord.Embed(title=f"おみくじ")

@@ -9,11 +9,9 @@ import requests
 class CountMembers(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.count=0
 
     @commands.command()
     async def count_members(self, ctx ,*roles_):
-        self.count+=1
         targets=[]
         not_targets=[]
         for role in roles_:
